@@ -10,6 +10,25 @@ use App\Models\EmployeeAddress;
 
 class EmployeeController extends Controller
 {
+    /* 
+    For doing the employee search function concepts here
+    */
+    public function search(Request $request)
+    {
+        $keyword = trim($request->query('search'), "\"'");
+        
+        $employees = Employee::with(['contacts', 'addresses', 'department'])
+            ->where(function ($query) use ($keyword) {
+                $query->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('email', 'like', "%{$keyword}%");
+            })
+            ->get();
+
+        return response()->json($employees);
+    }
+
+
+
     /**
      * Display a listing of the resource.
      */

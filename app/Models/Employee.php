@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\EmployeeContact;
+use App\Models\EmployeeAddress;
+use App\Models\Department;
 class Employee extends Model
 {
     use HasFactory;
