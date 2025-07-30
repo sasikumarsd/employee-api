@@ -1,61 +1,151 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Employee Management API - Laravel Project
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+This Laravel project provides a RESTful API for managing employees, their departments, contacts, and addresses. It includes features such as CRUD operations, eager loading, searching, pagination, and input validation.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP >= 8.0
+- Composer
+- Laravel >= 10
+- MySQL
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Setup Instructions
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **Clone the repository**:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+   git clone https://github.com/sasikumarsd/employee-api.git
+   cd employee-api
+```
 
-## Laravel Sponsors
+2. **Install dependencies**:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+   composer install
+```
 
-### Premium Partners
+3. **Create and configure **``:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+   cp .env.example .env
+   php artisan key:generate
+```
 
-## Contributing
+4. **Update database credentials** in `.env`:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+   DB_DATABASE=your_db
+   DB_USERNAME=root
+   DB_PASSWORD=
+```
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5. **Start the development server**:
 
-## Security Vulnerabilities
+```bash
+   php artisan serve
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
+
+## API Endpoints
+
+### Departments
+
+- `GET /api/departments` - List all departments
+- `POST /api/departments` - Create department
+- `GET /api/departments/{id}` - Show department
+- `PUT /api/departments/{id}` - Update department
+- `DELETE /api/departments/{id}` - Delete department
+
+### Employees
+
+- `GET /api/employees` - List all employees (with pagination)
+- `GET /api/employees/search?search={keyword}` - Search by name or email
+- `GET /api/employees/{id}` - Show employee with relations
+- `POST /api/employees` - Create employee with contacts and addresses
+- `PUT /api/employees/{id}` - Update employee data and nested relations
+- `DELETE /api/employees/{id}` - Delete employee and associated data
+
+---
+
+## Sample Request: Create Employee
+
+```json
+POST /api/employees
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "department_id": 1,
+  "contacts": ["9876543210", "9123456780"],
+  "addresses": [
+    {
+      "address_line1": "123 Street",
+      "address_line2": "Apt 101",
+      "city": "Chennai",
+      "state": "TN",
+      "postal_code": "600001"
+    },
+    {
+      "address_line1": "2nd Avenue",
+      "address_line2": "Flat B2",
+      "city": "Bangalore",
+      "state": "KA",
+      "postal_code": "560001"
+    }
+  ]
+}
+```
+
+---
+
+## Pagination Example
+
+- `GET /api/employees?per_page=1&page=1`
+- Default per page: 10
+- Supports metadata like `total`, `current_page`, `last_page` in response.
+
+---
+
+## Search Example
+
+- `GET /api/employees/search?search=john`
+- Case-insensitive search through name and email
+
+---
+
+## Validation & Security
+
+- Laravel Form Requests used for employee and department creation and updates.
+- Proper 404 and 422 responses for invalid data.
+- JSON structure standardized for errors and success.
+- Input validation for all request fields
+- Sanitized search inputs
+- API routes protected using default Laravel CSRF & headers (you may extend this with Sanctum or Passport for token-based auth)
+
+---
+
+## Notes
+
+- Eager loading is implemented to optimize queries.
+- Cascading delete handled for contacts and addresses.
+
+---
+
+## Author
+
+Developed by: Sasi Kumar
+Contact: sasikrs18@gmail.com
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-source and free to use under the MIT License.
+

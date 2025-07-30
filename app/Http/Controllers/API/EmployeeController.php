@@ -5,14 +5,12 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Employee;
-use App\Models\EmployeeContact;
-use App\Models\EmployeeAddress;
 
 class EmployeeController extends Controller
 {
-    /* 
-    For doing the employee search function concepts here
-    */
+    /**
+     * Search employees by name or email.
+     */
     public function search(Request $request)
     {
         $keyword = trim($request->query('search'), "\"'");
@@ -24,28 +22,38 @@ class EmployeeController extends Controller
             })
             ->get();
 
+        return response()->json([
+            'message' => 'Search completed',
+            'results' => $employees
+        ]);
+    }
+
+    /**
+     * Display a listing of the employees.
+     */
+    public function index(Request $request)
+    {
+        // $employees = Employee::with(['department', 'contacts', 'addresses'])->get();
+
+        // return response()->json([
+        //     'message' => 'Employee list fetched successfully',
+        //     'data' => $employees
+        // ]);
+
+        $perPage = $request->get('per_page', 10); // Default 10 records per page
+
+        $employees = Employee::with(['contacts', 'addresses', 'department'])
+            ->paginate($perPage);
+
         return response()->json($employees);
     }
 
-
-
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return response()->json(
-            Employee::with(['department', 'contacts', 'addresses'])->get()
-        );
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Store a newly created employee.
      */
     public function store(Request $request)
     {
-        // dd('Reached store method');
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:employees',
             'department_id' => 'required|exists:departments,id',
@@ -60,21 +68,22 @@ class EmployeeController extends Controller
 
         $employee = Employee::create($request->only('name', 'email', 'department_id'));
 
-        // Save contacts
         foreach ($request->contacts ?? [] as $phone) {
             $employee->contacts()->create(['phone' => $phone]);
         }
 
-        // Save addresses
         foreach ($request->addresses ?? [] as $addr) {
             $employee->addresses()->create($addr);
         }
 
-        return response()->json($employee->load(['department', 'contacts', 'addresses']), 201);
+        return response()->json([
+            'message' => 'Employee created successfully',
+            'employee' => $employee->load(['department', 'contacts', 'addresses'])
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified employee.
      */
     public function show(string $id)
     {
@@ -84,11 +93,14 @@ class EmployeeController extends Controller
             return response()->json(['message' => 'Employee not found'], 404);
         }
 
-        return response()->json($employee);
+        return response()->json([
+            'message' => 'Employee details fetched successfully',
+            'employee' => $employee
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified employee.
      */
     public function update(Request $request, string $id)
     {
@@ -98,7 +110,7 @@ class EmployeeController extends Controller
             return response()->json(['message' => 'Employee not found'], 404);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:employees,email,' . $id,
             'department_id' => 'required|exists:departments,id',
@@ -113,23 +125,24 @@ class EmployeeController extends Controller
 
         $employee->update($request->only('name', 'email', 'department_id'));
 
-        // Delete old contacts/addresses
         $employee->contacts()->delete();
-        $employee->addresses()->delete();
-
         foreach ($request->contacts ?? [] as $phone) {
             $employee->contacts()->create(['phone' => $phone]);
         }
 
+        $employee->addresses()->delete();
         foreach ($request->addresses ?? [] as $addr) {
             $employee->addresses()->create($addr);
         }
 
-        return response()->json($employee->load(['department', 'contacts', 'addresses']));
+        return response()->json([
+            'message' => 'Employee updated successfully',
+            'employee' => $employee->load(['department', 'contacts', 'addresses'])
+        ]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified employee.
      */
     public function destroy(string $id)
     {
@@ -141,6 +154,6 @@ class EmployeeController extends Controller
 
         $employee->delete();
 
-        return response()->json(['message' => 'Employee deleted']);
+        return response()->json(['message' => 'Employee deleted successfully']);
     }
 }
