@@ -9,7 +9,7 @@ use App\Models\Employee;
 class EmployeeController extends Controller
 {
     /**
-     * Search employees by name or email.
+     * Search employees by name or email if we need any other field search we can able to add those too.
      */
     public function search(Request $request)
     {
